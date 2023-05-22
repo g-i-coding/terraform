@@ -22,7 +22,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames             = true
   enable_dns_support               = true
   tags = {
-    "Name" = "celzey-vpc"
+    "Name" = "superman.strong.name"
   }
 }
 #create a pubsub: cidr 10.0.0.0/24
@@ -49,7 +49,61 @@ resource "aws_subnet" "private" {
   }
   availability_zone = data.aws_availability_zones.availability_zone.names[count.index]
 }
-# public rt
-# private rt
+
 # igw
+resource "aws_internet_gateway" "main_igw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    "Name" = "celzey-igw"
+    "env"  = var.default_tags.env
+  }
+}
+# EIP
+resource "aws_eip" "NAT_EIP" {
+  vpc = true
+
+}
 # nat gw
+resource "aws_nat_gateway" "main_nat_gw" {
+  allocation_id = aws_eip.NAT_EIP.id
+  subnet_id     = aws_subnet.public.0.id
+  tags = {
+    "Name" = "${var.default_tags.env}-nat"
+  }
+}
+
+# public rt
+resource "aws_route_table" "public-rt" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    "Name" = "${var.default_tags.env}-public-rt"
+  }
+}
+resource "aws_route" "public" {
+  route_table_id         = aws_route_table.public-rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.main_igw.id
+}
+resource "aws_route_table_association" "public" {
+  route_table_id = aws_route_table.public-rt.id
+  count          = var.public_subnet_count
+  subnet_id      = element(aws_subnet.public.*.id, count.index)
+}
+# private rt
+resource "aws_route_table" "private-rt" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    "Name" = "${var.default_tags.env}-private-rt"
+  }
+}
+resource "aws_route" "private" {
+  route_table_id         = aws_route_table.private-rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_nat_gateway.main_nat_gw.id
+}
+resource "aws_route_table_association" "private" {
+  route_table_id = aws_route_table.private-rt.id
+  count          = var.public_subnet_count
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+}
