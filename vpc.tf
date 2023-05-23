@@ -5,6 +5,11 @@ terraform {
       version = "~> 4.0"
     }
   }
+  backend "s3" {
+    bucket = "celzey-tf-bucket"
+    key    = "terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 
 # Configure the AWS Provider
@@ -22,7 +27,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames             = true
   enable_dns_support               = true
   tags = {
-    "Name" = "superman.strong.name"
+    "Name" = "celzey-vpc"
   }
 }
 #create a pubsub: cidr 10.0.0.0/24

@@ -27,3 +27,7 @@ resource "aws_default_security_group" "main" {
   }
 
 }
+
+output "ec2_ssh_command" {
+  value = "ssh -i celzey.pem ec2-user@ec2-${replace(aws_instance.main.public_ip, ".", "-")}.compute-1.amazonaws.com"
+}
