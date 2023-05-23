@@ -41,7 +41,7 @@ resource "aws_rds_cluster_instance" "db" {
   count                = 2
   identifier           = "celzey-tf-${count.index + 1}"
   cluster_identifier   = aws_rds_cluster.db.id
-  instance_class       = "db.t3.small"
+  instance_class       = "db.serverless"
   engine               = aws_rds_cluster.db.engine
   engine_version       = aws_rds_cluster.db.engine_version
   db_subnet_group_name = aws_db_subnet_group.db.name
