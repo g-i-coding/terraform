@@ -26,14 +26,7 @@ variable "sg_db_egress" {
     self     = bool
   }))
 }
-variable "db_credentials" {
-  type      = map(any)
-  sensitive = true
-  default = {
-    username = "username"
-    password = "password"
-  }
-}
+
 
 variable "sg_source" {
   type        = list(string)
